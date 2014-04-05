@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Die Linux Distro NixOS</title>
+
+    <meta name="description" content="Eine Distribution basierend auf rein funktionalem Packet Management.">
+    <meta name="author" content="Johannes Raggam">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/default.css" id="theme">
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
+    <link rel="stylesheet" href="custom.css">
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+    <!--[if lt IE 9]>
+    <script src="reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+      <div class="slides">
+
+        <section data-background="#07946A">
+          <h1>Die Linux Distro NixOS</h1>
+          <h3>Eine Distribution basierend auf rein funktionalem Packet Management.</h3>
+          <p>
+            <small>Von <a href="http://johannes.raggam.co.at">Johannes Raggam</a> / <a href="http://twitter.com/thetetet">@thetetet</a> / <a href="http://github.com/thet">github.com/thet</a></small>
+          </p>
+          <p>
+            <a href="http://nixos.org/"><img class="logo" src="nixos-hires.png"/></a>
+          </p>
+          <p>
+            <small><a href="?print-pdf">Printansicht / PDF Export</a></small>
+          </p>
+          <aside class="notes">
+            <ul>
+              <li>b - 'paused' mode.</li>
+              <li>Alt-Click - zoom.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="#D58F2A">
+          <h2>$ whoami</h2>
+          <h3>Johannes Raggam (DI(FH))</h3>
+          <p>Web Developer, Open Source Enthusiast, Linux User, Python Aficionado, Plone Developer.</p>
+          <p>Talk über <strong>Plone 5</strong> um 16:00, SR2 :)
+        </section>
+
+        <section data-background="#07946A">
+          <h2>$ whatis NixOS</h2>
+          <ul>
+            <li>Linux Distribution</li>
+            <li>Basiert auf funktionalem Packet Manager Nix</li>
+          </ul>
+        </section>
+
+        <section data-background="#4FD52A">
+          <section>
+            <h2>$ whatis Nix</h2>
+            <h3>purely functional package manager</h3>
+            <p>Packete werden mittels funktionaler Sprache ohne Seiteneffekte beschrieben. Mit einem definiertem Set an Eingabevariablen wird immer das selbe Build-Ergebnis erzielt.</p>
+          </section>
+          <section>
+            <h3>Heißt was?</h3>
+            <p>Packete werden unter <pre>/nix/store</pre> mit eindeutigem Hash als Pfadname abgelegt.</p>
+            <pre><code>
+              /nix/store/r8vvq9kq18pz08v249h8my6r9vs7s0n3-firefox-2.0.0.1/ 
+            </code></pre>
+          </section>
+          <section>
+            <h3>Bringt was?</h3>
+            <ul>
+              <li>Multiple versions: vom gleichen Packet</li>
+              <li>Complete dependencies: da diese definiert werden <em>müssen</em>. Compiler suchen nicht im /nix/store ...</li>
+              <li>Multi user support: per-user nix/store</li>
+              <li>Atomic upgrades and rollbacks</li>
+              <li>Garbage collection</li>
+              <li>Stateless</li>
+            </ul>
+          </section>
+        </section>
+
+        <section data-background="#07946A">
+          <h2>$ whatis NixOS</h2>
+          <ul>
+            <li>Linux Distribution <strong>✓</strong></li>
+            <li>Basiert auf funktionalem Packet Manager Nix <strong>✓</strong></li>
+            <li class="fragment">Declarative system configuration <strong>✓</strong></li>
+            <li class="fragment">Repeatable deployments/rollouts <strong>✓</strong></li>
+            <li class="fragment">Reliable Upgrades <strong>✓</strong></li>
+            <li class="fragment">Atomic upgrades <strong>✓</strong></li>
+            <li class="fragment">Rollbacks <strong>✓</strong></li>
+            <li class="fragment">Reproducable system configurations <strong>✓</strong></li>
+            <li class="fragment">Safe to test changes <strong>✓</strong></li>
+            <li class="fragment">Source-based model, with binaries <strong>✓</strong></li>
+            <li class="fragment">Consistency <strong>✓</strong></li>
+            <li class="fragment">Multi-user package management <strong>✓</strong></li>
+          </ul>
+        </section>
+
+        <section data-background="#4FD52A">
+          <h2>Meine NixOS Konfiguration</h2>
+          <pre><code>
+{ config, pkgs, ... }:
+
+{
+  imports = [ ./hardware-configuration.nix ];
+
+  # Use the gummiboot efi boot loader.
+  boot.loader.grub.enable = false;
+  boot.loader.gummiboot.enable = true;
+  boot.loader.gummiboot.timeout = 2;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  networking.hostName = "luft"; # Define your hostname.
+  networking.connman.enable = true;  # Enables wireless.
+
+  # Enable the X11 windowing system.
+  services = {
+    xserver = {
+      enable = true;
+      #layout = 'us';
+      synaptics.enable = true;
+      windowManager.awesome.enable = true;
+      displayManager.slim.enable = true;		
+      desktopManager.xfce.enable = true;
+    };
+  };
+  hardware.opengl.videoDrivers = [ "intel" ];
+
+  fileSystems = [
+    { mountPoint = "/home";
+      device = "/dev/sda9";
+      options = "defaults,discard,noatime";
+    }
+    { mountPoint = "/tmp";
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = "nosuid,nodev,relatime";
+    }
+  ];
+  swapDevices = [
+    { device = "/dev/sda11"; }
+  ];
+
+  environment = {
+    interactiveShellInit = ''
+        export EDITOR="vim"
+        export EMAIL=johannes@raggam.co.at
+        export FULLNAME="Johannes Raggam"
+    '';
+    systemPackages = with pkgs; [
+
+      chromiumWrapper
+      firefoxWrapper
+      vimHugeX
+      xlibs.xmodmap
+      # ...
+
+    ];
+  };
+
+}
+            
+          </pre></code>
+        </section>
+
+        <section data-background="#4FD52A">
+          <h2>Installation</h2>
+          <p>Quelle: Domen Kožar <a href="http://static.domenkozar.com/slides/nixos-fosdem2014/#/15">NixOS: declarative linux distribution</a></p>
+          <ul>
+            <li>Download ISO from http://nixos.org/nixos and boot it</li>
+            <li>fdisk /dev/sda</li>
+            <li>mkfs.ext4 /dev/sda1</li>
+            <li>mount /dev/sda1 /mnt</li>
+            <li>nixos-generate-config --root /mnt</li>
+            <li>nano /mnt/etc/nixos/configuration.nix</li>
+            <li>nixos-install</li>
+            <li>reboot</li>
+          </ul>
+        </section>
+
+        <section data-background="#07946A">
+          <h2>Links</h2>
+          <ul>
+            <li><a href="http://nixos.org/nix/">http://nixos.org/nix/</a></li>
+            <li><a href="http://nixos.org/nixos/">http://nixos.org/nixos/</a></li>
+            <li><a href="https://nixos.org/wiki/">https://nixos.org/wiki/</a></li>
+            <li><a href="https://github.com/NixOS">https://github.com/NixOS</a></li>
+            <li><a href="https://www.domenkozar.com/category/nixos/">https://www.domenkozar.com/category/nixos/</a></li>
+            <li><a href="http://static.domenkozar.com/slides/nixos-fosdem2014/">http://static.domenkozar.com/slides/nixos-fosdem2014/</a></li>
+          </ul>
+        </section>
+
+        <section data-background="#07946A">
+          <h1>That's all folks!</h1>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
+        backgroundTransition: 'slide',
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
